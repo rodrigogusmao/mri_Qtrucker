@@ -408,6 +408,12 @@ RegisterNUICallback('randomRoute', function(data, cb)
     cb(route)
 end)
 
+RegisterNUICallback('getRanking', function(data, cb)
+    local category = data.category or 'xp'
+    local ranking = lib.callback.await('mri_Qtrucker:getRanking', false, category)
+    cb(ranking)
+end)
+
 -- ─── Resultado da entrega (vindo do servidor) ─────────────────────────────────
 
 RegisterNetEvent('mri_Qtrucker:deliveryResult', function(result)
