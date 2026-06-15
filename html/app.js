@@ -58,6 +58,7 @@ function switchTab(tab) {
 
     if (tab === 'history') renderHistory();
     if (tab === 'rent')    renderRentSection();
+    if (tab === 'ranking') renderRanking();
 }
 
 // ─── Dashboard ───────────────────────────────────────────────────────────────
@@ -70,6 +71,18 @@ function renderDashboard() {
     const xp        = d.xp        || 0;
     const progress  = d.xpProgress || 0;
     const xpNext    = d.xpToNextLevel || 0;
+
+    // Top Rank Banner
+    const topRankBanner = document.getElementById('top-rank-banner');
+    if (topRankBanner) {
+        if (d.rank && d.rankBuff && d.rank <= 3) {
+            topRankBanner.classList.remove('hidden');
+            document.getElementById('top-rank-pos').textContent = d.rank;
+            document.getElementById('top-rank-buff').textContent = `+${Math.round((d.rankBuff - 1) * 100)}%`;
+        } else {
+            topRankBanner.classList.add('hidden');
+        }
+    }
 
     // Sidebar
     document.getElementById('sidebar-level-badge').textContent = `Nv. ${level}`;
@@ -331,6 +344,61 @@ function renderHistory() {
     });
 }
 
+// ─── Ranking ─────────────────────────────────────────────────────────────────
+let currentRankingCategory = 'xp';
+
+async function renderRanking() {
+    const list = document.getElementById('ranking-list');
+    list.innerHTML = '<div class="empty-state">Carregando ranking...</div>';
+
+    try {
+        const res = await nuiPost('getRanking', { category: currentRankingCategory });
+        const ranking = await res.json();
+
+        list.innerHTML = '';
+
+        if (!ranking || !ranking.length) {
+            list.innerHTML = '<div class="empty-state">Nenhum dado encontrado no ranking.</div>';
+            return;
+        }
+
+        ranking.forEach((player, index) => {
+            let metricHtml = '';
+            
+            if (currentRankingCategory === 'xp') {
+                metricHtml = `
+                    <div class="ranking-right">
+                        <div class="ranking-level" style="font-size: 14px;">${player.xp} XP</div>
+                    </div>`;
+            } else if (currentRankingCategory === 'level') {
+                metricHtml = `
+                    <div class="ranking-right">
+                        <div class="ranking-level" style="font-size: 14px;">Nível ${player.level}</div>
+                    </div>`;
+            } else if (currentRankingCategory === 'deliveries') {
+                metricHtml = `
+                    <div class="ranking-right">
+                        <div class="ranking-level" style="font-size: 14px;">${player.total_deliveries} Entregas</div>
+                    </div>`;
+            }
+
+            const el = document.createElement('div');
+            el.className = 'ranking-item';
+            el.innerHTML = `
+                <div class="ranking-pos">#${index + 1}</div>
+                <div class="ranking-icon"><svg class="icon" aria-hidden="true"><use href="#icon-trophy"/></svg></div>
+                <div class="ranking-info">
+                    <div class="ranking-name">${player.name}</div>
+                </div>
+                ${metricHtml}
+            `;
+            list.appendChild(el);
+        });
+    } catch (e) {
+        list.innerHTML = '<div class="empty-state">Erro ao carregar o ranking.</div>';
+    }
+}
+
 // ─── HUD ─────────────────────────────────────────────────────────────────────
 function showHUD(data) {
     const hud = document.getElementById('job-hud');
@@ -441,12 +509,23 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Filtros de empresa
-    document.querySelectorAll('.filter-btn').forEach(btn => {
+    document.querySelectorAll('.filter-btn:not(.ranking-filter-btn)').forEach(btn => {
         btn.addEventListener('click', () => {
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            if (btn.id === 'btn-random-route') return;
+            document.querySelectorAll('.filter-btn:not(.ranking-filter-btn):not(.filter-btn-random)').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             state.filterCompany = btn.dataset.company;
             renderRoutes();
+        });
+    });
+
+    // Filtros de ranking
+    document.querySelectorAll('.ranking-filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.ranking-filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentRankingCategory = btn.dataset.ranking;
+            renderRanking();
         });
     });
 

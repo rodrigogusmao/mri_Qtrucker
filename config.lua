@@ -56,6 +56,13 @@ Config.Levels = {
     [10] = { xp = 38000,  label = "Caminhoneiro",  multiplier = 3.50, color = "#f59e0b" },
 }
 
+-- Bônus de multiplicador no pagamento para os Top 3 do Ranking de XP
+Config.TopRankingBuffs = {
+    [1] = 1.5, -- Top 1: +50% de lucro
+    [2] = 1.3, -- Top 2: +30% de lucro
+    [3] = 1.1, -- Top 3: +10% de lucro
+}
+
 -- Empresas de transporte
 Config.Companies = {
     transbrasil = {

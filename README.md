@@ -217,6 +217,26 @@ Config.Levels = {
 
 ---
 
+### Sistema de Ranking e Bônus Top 3
+
+O sistema conta com um painel de ranking interativo onde os jogadores competem pelo posto de melhor motorista (por XP, Nível ou Entregas). Aqueles que estiverem no Top 3 do ranking de XP ganham um bônus financeiro em **todas as entregas**. O bônus se acumula (multiplica) com o bônus do nível atual do jogador.
+
+```lua
+Config.TopRankingBuffs = {
+    [1] = 1.5, -- Top 1: +50% de lucro
+    [2] = 1.3, -- Top 2: +30% de lucro
+    [3] = 1.1, -- Top 3: +10% de lucro
+}
+```
+
+| Ranking | Bônus | Descrição |
+|---|---|---|
+| `[1]` | 1.5 | Multiplica o pagamento total (base + nível) por 1.5x |
+| `[2]` | 1.3 | Multiplica o pagamento total (base + nível) por 1.3x |
+| `[3]` | 1.1 | Multiplica o pagamento total (base + nível) por 1.1x |
+
+---
+
 ### Despachantes (NPCs)
 
 ```lua

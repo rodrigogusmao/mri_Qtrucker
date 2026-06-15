@@ -44,6 +44,9 @@
     <symbol id="icon-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
     </symbol>
+    <symbol id="icon-trophy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+    </symbol>
     <symbol id="icon-trending" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
         <polyline points="17 6 23 6 23 12"/>
@@ -136,6 +139,10 @@
                     <svg class="icon icon-sm nav-icon" aria-hidden="true"><use href="#icon-key"/></svg>
                     Alugar Caminhão
                 </button>
+                <button class="nav-btn" data-tab="ranking">
+                    <svg class="icon icon-sm nav-icon" aria-hidden="true"><use href="#icon-trophy"/></svg>
+                    Ranking
+                </button>
             </nav>
 
             <div class="sidebar-player">
@@ -161,6 +168,16 @@
             <!-- Dashboard -->
             <section id="tab-dashboard" class="tab-section">
                 <div class="section-title">Meu Perfil</div>
+
+                <div id="top-rank-banner" class="active-job-card hidden" style="background: rgba(245,158,11,0.06); border-color: rgba(245,158,11,0.25);">
+                    <div class="active-job-label" style="color: #fbbf24;">
+                        <svg class="icon icon-xs" aria-hidden="true"><use href="#icon-trophy"/></svg>
+                        TOP <span id="top-rank-pos">3</span> MOTORISTA
+                    </div>
+                    <div class="active-job-info" style="margin-bottom:0;">
+                        Você está no top 3 do servidor! Ganho extra em todas entregas: <strong id="top-rank-buff" style="color:#fbbf24;">+5%</strong>
+                    </div>
+                </div>
 
                 <div id="active-job-card" class="active-job-card hidden">
                     <div class="active-job-label">
@@ -270,6 +287,19 @@
                 <div class="section-title">Histórico de Entregas</div>
                 <div class="history-list" id="history-list">
                     <div class="empty-state">Nenhuma entrega registrada ainda.</div>
+                </div>
+            </section>
+
+            <!-- Ranking -->
+            <section id="tab-ranking" class="tab-section hidden">
+                <div class="section-title">Ranking de Motoristas</div>
+                <div class="filter-bar" style="margin-bottom: 14px;">
+                    <button class="filter-btn ranking-filter-btn active" data-ranking="xp">XP</button>
+                    <button class="filter-btn ranking-filter-btn" data-ranking="level">Nível</button>
+                    <button class="filter-btn ranking-filter-btn" data-ranking="deliveries">Entregas</button>
+                </div>
+                <div class="ranking-list" id="ranking-list">
+                    <div class="empty-state">Carregando ranking...</div>
                 </div>
             </section>
 

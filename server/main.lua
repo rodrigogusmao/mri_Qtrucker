@@ -31,6 +31,11 @@ lib.callback.register('mri_Qtrucker:getPlayerData', function(source)
     data.xpProgress    = GetXPProgress(data.xp)
     data.xpToNextLevel = GetXPToNextLevel(data.xp)
     data.levelData     = Config.Levels[level]
+    
+    local rank = MySQL.scalar.await('SELECT COUNT(*) FROM mri_qtrucker_players WHERE xp > ?', { data.xp }) + 1
+    data.rank = rank
+    data.rankBuff = Config.TopRankingBuffs and Config.TopRankingBuffs[rank] or nil
+    
     return data
 end)
 
@@ -69,6 +74,44 @@ lib.callback.register('mri_Qtrucker:rentTruck', function(source, data)
     return false, 'Dinheiro insuficiente'
 end)
 
+lib.callback.register('mri_Qtrucker:getRanking', function(source, category)
+    local orderCol = 'xp'
+    if category == 'level' then orderCol = 'level'
+    elseif category == 'deliveries' then orderCol = 'total_deliveries'
+    end
+
+    local query = string.format('SELECT citizenid, xp, level, total_deliveries FROM mri_qtrucker_players ORDER BY %s DESC LIMIT 50', orderCol)
+    local playersData = MySQL.query.await(query)
+
+    local ranking = {}
+    if not playersData then return ranking end
+
+    for _, v in ipairs(playersData) do
+        local name = 'Desconhecido'
+        local pData = MySQL.single.await('SELECT charinfo FROM players WHERE citizenid = ?', { v.citizenid })
+        
+        if pData and pData.charinfo then
+            local charinfo = pData.charinfo
+            if type(charinfo) == 'string' then
+                local success, result = pcall(json.decode, charinfo)
+                if success then charinfo = result else charinfo = nil end
+            end
+            
+            if type(charinfo) == 'table' and charinfo.firstname and charinfo.lastname then
+                name = charinfo.firstname .. ' ' .. charinfo.lastname
+            end
+        end
+        table.insert(ranking, {
+            citizenid = v.citizenid,
+            name = name,
+            xp = v.xp,
+            level = v.level,
+            total_deliveries = v.total_deliveries
+        })
+    end
+    return ranking
+end)
+
 RegisterNetEvent('mri_Qtrucker:completeDelivery', function(payload)
     local src    = source
     local player = exports.qbx_core:GetPlayer(src)
@@ -104,8 +147,11 @@ RegisterNetEvent('mri_Qtrucker:completeDelivery', function(payload)
     if elapsed <= (route.timeLimit * 60) then
         timeBonus = math.floor(basePay * Config.TimeBonusPercent)
     end
+    
+    local rank = MySQL.scalar.await('SELECT COUNT(*) FROM mri_qtrucker_players WHERE xp > ?', { data.xp }) + 1
+    local rankBuff = Config.TopRankingBuffs and Config.TopRankingBuffs[rank] or 1.0
 
-    local totalPay = basePay + timeBonus
+    local totalPay = math.floor((basePay + timeBonus) * rankBuff)
 
     -- XP
     local xpGained = route.baseXP + cargo.baseXP
